@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trivia</title>
+  <link rel="shortcut icon" href="img/remington.png">
+  <link href="css/style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+  <div id="inicio" class="box">
+    <h2>TRIVIA</h2>
+    <h3>¿Cuál es tu nombre?</h3>
+    <p>
+      <input type="text" id="txtNombre" class="textbox" placeholder="Ingresa tu nombre">
+    </p>
+    <p>
+      <input type="email" id="txtCorreo" class="textbox" placeholder="Ingresa tu correo electrónico">
+    </p>
+    <p>
+      <button class="btn blue" onclick="iniciarTrivia()">ENTRAR</button>
+    </p>
+    <p>
+      <button class="btn blue" onclick="ingresarComoAdmin()">Ingresar como Administrador</button>
+    </p>
+  </div>
+
+  <div id="preguntas" class="box oculto">
+    <!-- Las preguntas se agregarán aquí mediante JavaScript -->
+  </div>
+
+  <div id="adminPanel" class="box oculto">
+    <h2>Panel de Administrador</h2>
+    <div id="preguntas-admin">
+      <!-- Las preguntas se agregarán aquí mediante JavaScript -->
+    </div>
+    <button class="btn blue" onclick="actualizarPreguntas()">Actualizar Preguntas</button>
+  </div>
+
+  <script>
+    let preguntas = [
+      {
+        enunciado: "¿Cuál es la capital de Francia?",
+        opciones: ["Roma", "Berlín", "París", "Londres"],
+        respuesta: "París",
+        tipo: "cerrada"
+      },
+      {
+        enunciado: "¿Quién escribió 'Don Quijote de la Mancha'?",
+        opciones: ["Miguel de Cervantes", "Gabriel García Márquez", "Pablo Neruda", "Mario Vargas Llosa"],
+        respuesta: "Miguel de Cervantes",
+        tipo: "cerrada"
+      },
+      {
+        enunciado: "¿Cuál es el río más largo del mundo?",
+        opciones: ["Amazonas", "Nilo", "Misisipi", "Yangtsé"],
+        respuesta: "Amazonas",
+        tipo: "cerrada"
+      },
+      {
+        enunciado: "¿En qué año se firmó la Declaración de Independencia de los Estados Unidos?",
+        opciones: ["1776", "1789", "1812", "1865"],
+        respuesta: "1776",
+        tipo: "cerrada"
+      },
+      {
+        enunciado: "¿Cuál es el país más grande del mundo por territorio?",
+        opciones: ["Rusia", "Canadá", "China", "Estados Unidos"],
+        respuesta: "Rusia",
+        tipo: "cerrada"
+      },
+      {
+        enunciado: "¿Quién pintó la Mona Lisa?",
+        opciones: ["Leonardo da Vinci", "Pablo Picasso", "Vincent van Gogh", "Michelangelo"],
+        respuesta: "Leonardo da Vinci",
+        tipo: "cerrada"
+      },
+      {
+        enunciado: "¿Cuál es la montaña más alta del mundo?",
+        opciones: ["Everest", "K2", "Kangchenjunga", "Lhotse"],
+        respuesta: "Everest",
+        tipo: "cerrada"
+      },
+      {
+        enunciado: "¿Qué elemento químico tiene el símbolo 'Fe'?",
+        opciones: ["Hierro", "Oro", "Plata", "Cobre"],
+        respuesta: "Hierro",
+        tipo: "cerrada"
+      },
+      {
+        enunciado: "¿Cuál es el océano más grande del mundo?",
+        opciones: ["Pacífico", "Atlántico", "Índico", "Antártico"],
+        respuesta: "Pacífico",
+        tipo: "cerrada"
+      },
+      {
+        enunciado: "¿Quién fue el primer presidente de Estados Unidos?",
+        opciones: ["George Washington", "Thomas Jefferson", "Abraham Lincoln", "John Adams"],
+        respuesta: "George Washington",
+        tipo: "cerrada"
+      }
+    ];
+
+    function iniciarTrivia() {
+      var nombre = document.getElementById("txtNombre").value;
+      var correo = document.getElementById("txtCorreo").value;
+      
+      if (nombre.trim() === "" || correo.trim() === "") {
+        alert("Por favor, ingresa tu nombre y correo electrónico.");
+      } else {
+        document.getElementById("inicio").classList.add("oculto");
+        document.getElementById("preguntas").classList.remove("oculto");
+        generarPreguntasAleatorias();
+      }
+    }
+
+    function ingresarComoAdmin() {
+      var usuario = prompt("Ingrese su usuario:");
+      var contrasena = prompt("Ingrese su contraseña:");
+      
+      if (usuario === "uniremigton" && contrasena === "trivia2025") {
+        document.getElementById("inicio").classList.add("oculto");
+        document.getElementById("adminPanel").classList.remove("oculto");
+        generarPanelAdmin();
+      } else {
+        alert("Usuario o contraseña incorrectos");
+      }
+    }
+
+    function generarPreguntasAleatorias() {
+      const contenedorPreguntas = document.getElementById("preguntas");
+
+      preguntas = shuffle(preguntas);
+
+      preguntas.forEach((pregunta, index) => {
+        const divPregunta = document.createElement("div");
+        divPregunta.classList.add("pregunta");
+
+        const enunciado = document.createElement("p");
+        enunciado.textContent = `Pregunta ${index + 1}: ${pregunta.enunciado}`;
+        divPregunta.appendChild(enunciado);
+
+        pregunta.opciones = shuffle(pregunta.opciones);
+        pregunta.opciones.forEach(opcion => {
+          const label = document.createElement("label");
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = `respuesta${index}`;
+          input.value = opcion;
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(opcion));
+          divPregunta.appendChild(label);
+          divPregunta.appendChild(document.createElement("br"));
+        });
+
+        contenedorPreguntas.appendChild(divPregunta);
+      });
+
+      const btnCalcular = document.createElement("button");
+      btnCalcular.textContent = "Calcular Puntuación";
+      btnCalcular.classList.add("btn", "blue");
+      btnCalcular.onclick = calcularPuntuacion;
+      contenedorPreguntas.appendChild(btnCalcular);
+    }
+
+    function generarPanelAdmin() {
+      const contenedorPreguntas = document.getElementById("preguntas-admin");
+
+      preguntas.forEach((pregunta, index) => {
+        const divPregunta = document.createElement("div");
+        divPregunta.classList.add("pregunta-admin");
+
+        const enunciado = document.createElement("p");
+        enunciado.textContent = `Pregunta ${index + 1}: `;
+        const inputEnunciado = document.createElement("input");
+        inputEnunciado.type = "text";
+        inputEnunciado.value = pregunta.enunciado;
+        enunciado.appendChild(inputEnunciado);
+        divPregunta.appendChild(enunciado);
+
+        const opciones = document.createElement("p");
+        opciones.textContent = "Opciones: ";
+        divPregunta.appendChild(opciones);
+
+        const respuesta = document.createElement("p");
+        respuesta.textContent = "Respuesta correcta: ";
+        const inputRespuesta = document.createElement("input");
+        inputRespuesta.type = "text";
+        inputRespuesta.value = pregunta.respuesta;
+        respuesta.appendChild(inputRespuesta);
+        divPregunta.appendChild(respuesta);
+
+        for (let i = 0; i < 3; i++) {
+          const opcionInput = document.createElement("input");
+          opcionInput.type = "text";
+          opcionInput.value = pregunta.opciones[i];
+          opciones.appendChild(opcionInput);
+          opciones.appendChild(document.createElement("br"));
+        }
+
+        contenedorPreguntas.appendChild(divPregunta);
+      });
+    }
+
+    function actualizarPreguntas() {
+      const inputsEnunciado = document.querySelectorAll("#preguntas-admin input[type='text']:nth-child(2)");
+      const inputsRespuesta = document.querySelectorAll("#preguntas-admin input[type='text']:nth-child(6)");
+      const inputsOpciones = document.querySelectorAll("#preguntas-admin input[type='text']:not(:nth-child(2)):not(:nth-child(6))");
+
+      preguntas.forEach((pregunta, index) => {
+        pregunta.enunciado = inputsEnunciado[index].value;
+        pregunta.respuesta = inputsRespuesta[index].value;
+        pregunta.opciones = [];
+        for (let i = 0; i < 3; i++) {
+          pregunta.opciones.push(inputsOpciones[index * 3 + i].value);
+        }
+      });
+
+      document.getElementById("preguntas").innerHTML = "";
+      generarPreguntasAleatorias();
+      document.getElementById("adminPanel").classList.add("oculto");
+      document.getElementById("preguntas").classList.remove("oculto");
+    }
+
+    function shuffle(array) {
+      let currentIndex = array.length, temporaryValue, randomIndex;
+
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+
+      return array;
+    }
+
+    function calcularPuntuacion() {
+      const respuestasUsuario = [];
+      let respuestasCorrectas = 0;
+
+      preguntas.forEach((pregunta, index) => {
+        const input = document.querySelector(`input[name=respuesta${index}]:checked`);
+        respuestasUsuario.push(input ? input.value : "");
+      });
+
+      respuestasUsuario.forEach((respuesta, index) => {
+        if (respuesta === preguntas[index].respuesta) {
+          respuestasCorrectas++;
+        }
+      });
+
+      const puntuacion = respuestasCorrectas * 10;
+      alert(`Respuestas correctas: ${respuestasCorrectas}/10\nPuntuación: ${puntuacion}`);
+    }
+  </script>
+</body>
+</html>
